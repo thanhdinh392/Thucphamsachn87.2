@@ -83,7 +83,7 @@ const OrderController = {
               message: `Sản phẩm ${productInventory.productId.name} đã hết hàng! Vui lòng thử lại sau!`,
             });
           }
-          const product = Product.findById(item.product._id);
+          const product = await Product.findById(item.product._id);
           product.sold += item.quantity;
           await product.save();
           await productInventory.save();
