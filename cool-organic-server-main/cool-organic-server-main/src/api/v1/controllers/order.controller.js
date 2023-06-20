@@ -1,4 +1,5 @@
 const Order = require('../models/order.model');
+const Product = require('../models/product.model');
 const Inventory = require('../models/inventory.model');
 const orderService = require('../services/order.service');
 
@@ -65,24 +66,27 @@ const OrderController = {
       // Update inventory
       const handleUpdateInventory = async () => {
         for (const item of cart) {
-          const product = await Inventory.findOne({
+          const productInventory = await Inventory.findOne({
             productId: item.product._id,
           }).populate('productId');
-          if (!product) {
+          if (!productInventory) {
             return res.status(500).json({
               success: false,
               message: 'Đặt hàng thất bại, Vui lòng thử lại sau!',
             });
           }
-          product.quantity -= item.quantity;
-          if (product.quantity < 0) {
-            product.quantity = 0;
+          productInventory.quantity -= item.quantity;
+          if (productInventory.quantity < 0) {
+            productInventory.quantity = 0;
             return res.status(500).json({
               success: false,
-              message: `Sản phẩm ${product.productId.name} đã hết hàng! Vui lòng thử lại sau!`,
+              message: `Sản phẩm ${productInventory.productId.name} đã hết hàng! Vui lòng thử lại sau!`,
             });
           }
+          const product = Product.findById(item.product._id);
+          product.sold += item.quantity;
           await product.save();
+          await productInventory.save();
         }
       };
 
