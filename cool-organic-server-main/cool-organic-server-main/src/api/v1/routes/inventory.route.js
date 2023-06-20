@@ -5,6 +5,12 @@ const isAdmin = require('../middlewares/isAdmin');
 const verifyToken = require('../middlewares/verifyToken');
 
 Router.get('/', verifyToken, isAdmin, inventoryController.getAllInventory);
+Router.get(
+  '/get-all-quantity',
+  verifyToken,
+  isAdmin,
+  inventoryController.getAllQuantityOfProductInInventory
+);
 
 Router.put(
   '/:id',

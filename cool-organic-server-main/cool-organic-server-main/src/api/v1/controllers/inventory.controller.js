@@ -60,6 +60,32 @@ const inventoryController = {
       });
     }
   },
+  getAllQuantityOfProductInInventory: async (req, res) => {
+    try {
+      let totalQuantity = 0;
+      const products = await Inventory.find({}).populate('productId');
+      if (!products) {
+        return res.status(500).json({
+          success: false,
+          message:
+            'Lấy số lượng sản phẩm trong kho hàng thất bại, Vui lòng thử lại sau!',
+        });
+      }
+      products.forEach((product) => {
+        totalQuantity += product.quantity;
+      });
+      return res.status(200).json({
+        success: true,
+        totalQuantity,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message:
+          'Lấy số lượng sản phẩm trong kho hàng thất bại, Vui lòng thử lại sau!',
+      });
+    }
+  },
   updateQuantityOfProductInInventory: async (req, res) => {
     const { id } = req.params;
     const { quantity } = req.body;

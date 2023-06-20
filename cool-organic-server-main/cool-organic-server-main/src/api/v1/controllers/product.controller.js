@@ -208,6 +208,7 @@ const productController = {
             prePage: page > 1 ? page - 1 : null,
             nextPage: page < totalPages ? page + 1 : null,
             totalPages,
+            total: totalProducts,
           },
         });
       } else {
@@ -527,9 +528,9 @@ const productController = {
           .sort({ sold: -1 })
           .limit(limit)
           .skip(skip)
-          .select({
-            sold: 0,
-          })
+          // .select({
+          //   sold: 0,
+          // })
           .populate('inventory', 'quantity');
 
         const totalProducts = await Product.countDocuments(combineCondition);
@@ -554,11 +555,10 @@ const productController = {
         });
       }
 
-      const products = await Product.find(combineCondition)
-        .sort({ sold: -1 })
-        .select({
-          sold: 0,
-        });
+      const products = await Product.find(combineCondition).sort({ sold: -1 });
+      // .select({
+      //   sold: 0,
+      // });
       if (!products) {
         return res.status(500).json({
           success: false,

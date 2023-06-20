@@ -7,6 +7,12 @@ const verifyToken = require('../middlewares/verifyToken');
 Router.post('/', verifyToken, orderController.createOrder);
 
 Router.get('/', verifyToken, isAdmin, orderController.getAllOrders);
+Router.get(
+  '/get-total-revenue',
+  verifyToken,
+  isAdmin,
+  orderController.getTotalRevenue
+);
 Router.get('/:orderId', verifyToken, orderController.getOrderByOrderId);
 Router.get('/user/:id', verifyToken, orderController.getOrdersByUserId);
 

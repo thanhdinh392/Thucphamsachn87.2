@@ -82,6 +82,7 @@ const categoryController = {
             prePage: page > 1 ? page - 1 : null,
             nextPage: page < totalPages ? page + 1 : null,
             totalPages,
+            total: totalCategories,
           },
         });
       }

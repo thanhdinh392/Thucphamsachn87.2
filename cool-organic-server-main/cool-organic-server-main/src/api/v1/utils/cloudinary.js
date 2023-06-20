@@ -25,7 +25,7 @@ exports.uploadImage = async (res, file, folder) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Tải ảnh thất bại',
+      message: 'Tải ảnh thất bại abc',
     });
   }
 };

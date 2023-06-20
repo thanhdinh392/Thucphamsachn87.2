@@ -103,43 +103,45 @@ const OrderController = {
   getAllOrders: async (req, res) => {
     let { page, limit } = req.query;
 
-    if (!page || !limit) {
-      return res.status(400).json({
-        success: false,
-        message: 'Thiếu dữ liệu truyền lên!',
-      });
-    }
-
     try {
-      page = Number(page);
-      limit = Number(limit);
-      const skip = (page - 1) * limit;
-      const orders = await Order.find({})
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .skip(skip);
+      if (page && limit) {
+        page = Number(page);
+        limit = Number(limit);
+        const skip = (page - 1) * limit;
+        const orders = await Order.find({})
+          .sort({ createdAt: -1 })
+          .limit(limit)
+          .skip(skip);
 
-      const totalOrders = await Order.countDocuments({});
+        const totalOrders = await Order.countDocuments({});
 
-      const totalPages = Math.ceil(totalOrders / limit);
+        const totalPages = Math.ceil(totalOrders / limit);
 
-      if (!orders) {
-        return res.status(500).json({
-          success: false,
-          message: 'Có lỗi xảy ra, Vui lòng thử lại!',
+        if (!orders) {
+          return res.status(500).json({
+            success: false,
+            message: 'Có lỗi xảy ra, Vui lòng thử lại!',
+          });
+        }
+
+        return res.status(200).json({
+          success: true,
+          orders,
+          pagination: {
+            currentPage: page,
+            prePage: page > 1 ? page - 1 : null,
+            nextPage: page < totalPages ? page + 1 : null,
+            totalPages,
+            total: totalOrders,
+          },
+        });
+      } else {
+        const orders = await Order.find({}).sort({ createdAt: -1 });
+        return res.status(200).json({
+          success: true,
+          orders,
         });
       }
-
-      return res.status(200).json({
-        success: true,
-        orders,
-        pagination: {
-          currentPage: page,
-          prePage: page > 1 ? page - 1 : null,
-          nextPage: page < totalPages ? page + 1 : null,
-          totalPages,
-        },
-      });
     } catch (error) {
       return res.status(500).json({
         success: false,
@@ -243,6 +245,31 @@ const OrderController = {
       return res.status(500).json({
         success: false,
         message: 'Lấy đơn hàng thất bại, Vui lòng thử lại sau!',
+      });
+    }
+  },
+  getTotalRevenue: async (req, res) => {
+    try {
+      const orders = await Order.find({
+        shippingStatus: 'Giao hàng thành công',
+        paymentStatus: 'Đã thanh toán',
+      });
+      let totalRevenue = 0;
+
+      if (orders.length > 0) {
+        totalRevenue = orders.reduce((acc, order) => {
+          return acc + order.totalPrice;
+        }, 0);
+      }
+
+      return res.status(200).json({
+        success: true,
+        totalRevenue,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Lấy doanh thu thất bại, Vui lòng thử lại sau!',
       });
     }
   },
