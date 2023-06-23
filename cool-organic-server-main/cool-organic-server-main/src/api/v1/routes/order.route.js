@@ -13,6 +13,12 @@ Router.get(
   isAdmin,
   orderController.getTotalRevenue
 );
+Router.get(
+  '/get-compare-two-month-revenue',
+  verifyToken,
+  isAdmin,
+  orderController.getCompareTwoMonthRevenue
+);
 Router.get('/:orderId', verifyToken, orderController.getOrderByOrderId);
 Router.get('/user/:id', verifyToken, orderController.getOrdersByUserId);
 

@@ -277,6 +277,56 @@ const OrderController = {
       });
     }
   },
+  getCompareTwoMonthRevenue: async (req, res) => {
+    try {
+      const ordersCurrentMonth = await Order.find({
+        shippingStatus: 'Giao hàng thành công',
+        paymentStatus: 'Đã thanh toán',
+        createdAt: {
+          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+          $lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
+        },
+      });
+      const ordersPreMonth = await Order.find({
+        shippingStatus: 'Giao hàng thành công',
+        paymentStatus: 'Đã thanh toán',
+        createdAt: {
+          $gte: new Date(
+            new Date().getFullYear(),
+            new Date().getMonth() - 1,
+            1
+          ),
+          $lt: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+        },
+      });
+
+      let totalRevenueCurrentMonth = 0;
+      let totalRevenuePreMonth = 0;
+
+      if (ordersCurrentMonth.length > 0) {
+        totalRevenueCurrentMonth = ordersCurrentMonth.reduce((acc, order) => {
+          return acc + order.totalPrice;
+        }, 0);
+      }
+
+      if (ordersPreMonth.length > 0) {
+        totalRevenuePreMonth = ordersPreMonth.reduce((acc, order) => {
+          return acc + order.totalPrice;
+        }, 0);
+      }
+
+      return res.status(200).json({
+        success: true,
+        totalRevenueCurrentMonth,
+        totalRevenuePreMonth,
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: 'Lấy doanh thu thất bại, Vui lòng thử lại sau!',
+      });
+    }
+  },
   updateStatusOrder: async (req, res) => {
     const { shippingStatus, paymentStatus } = req.body;
     const { orderId } = req.params;
