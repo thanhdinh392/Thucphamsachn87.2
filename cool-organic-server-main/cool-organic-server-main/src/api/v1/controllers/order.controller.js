@@ -370,15 +370,37 @@ const OrderController = {
     const { orderId } = req.params;
 
     try {
-      const order = await Order.findOneAndDelete({
-        _id: orderId,
-      });
+      const order = await Order.findById(orderId);
+
       if (!order) {
         return res.status(404).json({
           success: false,
           message: 'Không tìm thấy đơn hàng!',
         });
       }
+      const cart = order.cart;
+
+      const handleUpdateInventory = async () => {
+        for (const item of cart) {
+          const productInventory = await Inventory.findOne({
+            productId: item.product._id,
+          }).populate('productId');
+          if (!productInventory) {
+            return res.status(500).json({
+              success: false,
+              message: 'Xóa đơn hàng thất bại, Vui lòng thử lại sau!',
+            });
+          }
+          productInventory.quantity += item.quantity;
+          const product = await Product.findById(item.product._id);
+          product.sold -= item.quantity;
+          await product.save();
+          await productInventory.save();
+        }
+      };
+
+      await handleUpdateInventory();
+      await order.deleteOne();
 
       return res.status(200).json({
         success: true,
@@ -386,6 +408,7 @@ const OrderController = {
         message: 'Xóa đơn hàng thành công!',
       });
     } catch (error) {
+      console.log(error);
       return res.status(500).json({
         success: false,
         message: 'Xóa đơn hàng thất bại, Vui lòng thử lại sau!',
