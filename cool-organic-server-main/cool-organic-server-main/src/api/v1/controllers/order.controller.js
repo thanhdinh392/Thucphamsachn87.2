@@ -229,11 +229,11 @@ const OrderController = {
       if (!order) {
         return res.status(404).json({
           success: false,
-          message: 'Không tìm thấy đơn hàng!',
+          message: 'Không tìm thấy đơn hNàng!',
         });
       }
 
-      if (req.role === 'user' && req.userId !== order.userId) {
+      if (req.role === 'user' && req.userId !== order.userId.valueOf()) {
         return res.status(403).json({
           success: false,
           message: 'Bạn không có quyền truy cập!',
